@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.justdoitandroid.base.BaseViewModel
 import com.example.justdoitandroid.data.model.Task
 import com.example.justdoitandroid.data.repository.TaskRepository
+import com.example.justdoitandroid.network.NetworkResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,9 +18,8 @@ sealed class HomeUiState {
 }
 
 class HomeViewModel : BaseViewModel() {
-    // 私有的可写流
+
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
-    // 对外暴露的只读流
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     override fun onPageEnter() {
@@ -36,11 +36,15 @@ class HomeViewModel : BaseViewModel() {
     private fun loadTasks() {
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
-            try {
-                val tasks = TaskRepository.getTasks()
-                _uiState.value = HomeUiState.Success(tasks)
-            } catch (e: Exception) {
-                _uiState.value = HomeUiState.Error(e.message ?: "未知错误")
+            when (val result = TaskRepository.getTasks()) {
+                is NetworkResult.Success ->
+                    _uiState.value = HomeUiState.Success(result.data)
+                is NetworkResult.BusinessError ->
+                    _uiState.value = HomeUiState.Error("业务错误 [${result.code}]：${result.message}")
+                is NetworkResult.HttpError ->
+                    _uiState.value = HomeUiState.Error("HTTP 错误 [${result.code}]：${result.message}")
+                is NetworkResult.Exception ->
+                    _uiState.value = HomeUiState.Error("网络异常：${result.throwable.message}")
             }
         }
     }
