@@ -34,6 +34,9 @@ class HomeViewModel : BaseViewModel() {
     }
 
     private fun loadTasks() {
+        // 已有数据时不重复请求（ViewModel 跨 Tab 存活，数据无需重新加载）
+        if (_uiState.value is HomeUiState.Success) return
+
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
             when (val result = TaskRepository.getTasks()) {

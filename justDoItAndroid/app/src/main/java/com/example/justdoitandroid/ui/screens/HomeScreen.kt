@@ -22,6 +22,7 @@ import com.example.justdoitandroid.base.BaseScreen
 import com.example.justdoitandroid.data.model.Task
 import com.example.justdoitandroid.ui.screens.home.HomeUiState
 import com.example.justdoitandroid.ui.screens.home.HomeViewModel
+import com.example.justdoitandroid.utils.scale
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
@@ -62,7 +63,7 @@ private fun TaskItem(task: Task) {
             .padding(horizontal = 16.dp, vertical = 6.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.scale),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
