@@ -39,11 +39,11 @@ class HomeViewModel : BaseViewModel() {
             when (val result = TaskRepository.getTasks()) {
                 is NetworkResult.Success ->
                     _uiState.value = HomeUiState.Success(result.data)
-                is NetworkResult.BusinessError ->
+                is NetworkResult.Error.Business ->
                     _uiState.value = HomeUiState.Error("业务错误 [${result.code}]：${result.message}")
-                is NetworkResult.HttpError ->
+                is NetworkResult.Error.Http ->
                     _uiState.value = HomeUiState.Error("HTTP 错误 [${result.code}]：${result.message}")
-                is NetworkResult.Exception ->
+                is NetworkResult.Error.Network ->
                     _uiState.value = HomeUiState.Error("网络异常：${result.throwable.message}")
             }
         }

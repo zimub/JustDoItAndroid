@@ -40,7 +40,7 @@ object TaskRepository {
                 )
             )
         } catch (e: Exception) {
-            NetworkResult.Exception(e)
+            NetworkResult.Error.Network(e)
         }
     }
 }

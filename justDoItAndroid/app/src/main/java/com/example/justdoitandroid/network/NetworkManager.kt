@@ -11,11 +11,13 @@ import java.io.IOException
  * ```kotlin
  * val result = NetworkManager.request { RetrofitClient.apiService.getTasks() }
  * when (result) {
- *     is NetworkResult.Success       -> { /* 使用 result.data */ }
- *     is NetworkResult.BusinessError -> { /* 业务码：result.code, result.message */ }
- *     is NetworkResult.HttpError     -> { /* HTTP码：result.code, result.message */ }
- *     is NetworkResult.Exception     -> { /* 异常：result.throwable */ }
+ *     is NetworkResult.Success        -> { /* 使用 result.data */ }
+ *     is NetworkResult.Error.Business -> { /* 业务码：result.code, result.message */ }
+ *     is NetworkResult.Error.Http     -> { /* HTTP码：result.code, result.message */ }
+ *     is NetworkResult.Error.Network  -> { /* 异常：result.throwable */ }
  * }
+ * // 或统一兜底：
+ * // is NetworkResult.Error -> { /* 所有错误 */ }
  * ```
  */
 object NetworkManager {
@@ -30,31 +32,31 @@ object NetworkManager {
             handleResponse(call())
         } catch (e: HttpException) {
             // Retrofit 抛出的 HTTP 错误
-            NetworkResult.HttpError(e.code(), e.message())
+            NetworkResult.Error.Http(e.code(), e.message())
         } catch (e: IOException) {
             // 无网络、连接超时等 IO 异常
-            NetworkResult.Exception(e)
+            NetworkResult.Error.Network(e)
         } catch (e: Throwable) {
             // JSON 解析失败等其他异常
-            NetworkResult.Exception(e)
+            NetworkResult.Error.Network(e)
         }
     }
 
     private fun <T> handleResponse(response: Response<ApiResponse<T>>): NetworkResult<T> {
         // 第一层：HTTP 错误码检查（4xx / 5xx）
         if (!response.isSuccessful) {
-            return NetworkResult.HttpError(response.code(), response.message())
+            return NetworkResult.Error.Http(response.code(), response.message())
         }
 
         val body = response.body()
-            ?: return NetworkResult.HttpError(response.code(), "响应体为空")
+            ?: return NetworkResult.Error.Http(response.code(), "响应体为空")
 
         // 第二层：业务错误码检查
         return if (body.code == BUSINESS_SUCCESS_CODE) {
             body.data?.let { NetworkResult.Success(it) }
-                ?: NetworkResult.BusinessError(body.code, "data 字段为空")
+                ?: NetworkResult.Error.Business(body.code, "data 字段为空")
         } else {
-            NetworkResult.BusinessError(body.code, body.message)
+            NetworkResult.Error.Business(body.code, body.message)
         }
     }
 }
