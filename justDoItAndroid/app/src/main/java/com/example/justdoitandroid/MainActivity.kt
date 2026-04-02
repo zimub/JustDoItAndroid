@@ -21,6 +21,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.justdoitandroid.navigation.Screen
 import com.example.justdoitandroid.ui.screens.ExploreScreen
+import com.example.justdoitandroid.ui.screens.TaskDetailScreen
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.justdoitandroid.ui.screens.HomeScreen
 import com.example.justdoitandroid.ui.screens.NotificationScreen
 import com.example.justdoitandroid.ui.screens.ProfileScreen
@@ -67,10 +70,25 @@ class MainActivity : ComponentActivity() {
                         startDestination = Screen.Home.route,
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        composable(Screen.Home.route) { HomeScreen() }
+                        composable(Screen.Home.route) {
+                            HomeScreen(onTaskClick = { task ->
+                                navController.navigate(Screen.TaskDetail.createRoute(task.id))
+                            })
+                        }
                         composable(Screen.Explore.route) { ExploreScreen() }
                         composable(Screen.Notification.route) { NotificationScreen() }
                         composable(Screen.Profile.route) { ProfileScreen() }
+                        composable(
+                            route = Screen.TaskDetail.route,
+                            arguments = listOf(navArgument("taskId") { type = NavType.IntType })
+                        ) { backStackEntry ->
+                            val taskId = backStackEntry.arguments?.getInt("taskId") ?: 0
+                            TaskDetailScreen(
+                                taskId = taskId,
+                                taskTitle = "任务 $taskId",
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
                     }
                 }
             }

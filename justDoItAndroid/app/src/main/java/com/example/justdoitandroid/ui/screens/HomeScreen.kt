@@ -25,7 +25,10 @@ import com.example.justdoitandroid.ui.screens.home.HomeViewModel
 import com.example.justdoitandroid.utils.scale
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(
+    onTaskClick: (Task) -> Unit = {},
+    homeViewModel: HomeViewModel = viewModel()
+) {
     BaseScreen(viewModel = homeViewModel) {
 
         // 监听密封类HomeUiState变化
@@ -41,7 +44,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
                 val tasks = (uiState as HomeUiState.Success).tasks
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(tasks) { task ->
-                        TaskItem(task = task)
+                            TaskItem(task = task, onClick = { onTaskClick(task) })
                     }
                 }
             }
@@ -56,11 +59,12 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
 }
 
 @Composable
-private fun TaskItem(task: Task) {
+private fun TaskItem(task: Task, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier.padding(16.scale),

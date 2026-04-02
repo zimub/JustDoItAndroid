@@ -17,6 +17,10 @@ sealed class Screen(
     object Notification : Screen("notification", "通知", Icons.Default.Notifications)
     object Profile : Screen("profile", "我的", Icons.Default.Person)
 
+    object TaskDetail : Screen("task_detail/{taskId}", "任务详情", Icons.Default.Home) {
+        fun createRoute(taskId: Int) = "task_detail/$taskId"
+    }
+
     companion object {
         val items = listOf(Home, Explore, Notification, Profile)
     }

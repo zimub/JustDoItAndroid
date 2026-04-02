@@ -22,10 +22,13 @@ class HomeViewModel : BaseViewModel() {
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    init {
+        loadTasks()
+    }
+
     override fun onPageEnter() {
         super.onPageEnter()
         Log.d("HomeViewModel", "========== 进入首页 ==========")
-        loadTasks()
     }
 
     override fun onPageLeave() {
@@ -34,9 +37,6 @@ class HomeViewModel : BaseViewModel() {
     }
 
     private fun loadTasks() {
-        // 已有数据时不重复请求（ViewModel 跨 Tab 存活，数据无需重新加载）
-        if (_uiState.value is HomeUiState.Success) return
-
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
             when (val result = TaskRepository.getTasks()) {
